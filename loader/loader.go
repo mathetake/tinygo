@@ -167,8 +167,8 @@ func Load(config *compileopts.Config, inputPkgs []string, clangHeaders string, t
 					Err:         err,
 				}
 			}
-			return nil, err
 		}
+
 		p.sorted = append(p.sorted, pkg)
 		p.Packages[pkg.ImportPath] = pkg
 	}
@@ -196,6 +196,7 @@ func (p *Program) getOriginalPath(path string) string {
 			}
 			maybeInTinyGoRoot = true
 		}
+
 		if maybeInTinyGoRoot {
 			tinygoPath := filepath.Join(goenv.Get("TINYGOROOT"), "src", relpath)
 			if _, err := os.Stat(tinygoPath); err == nil {
