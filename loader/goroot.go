@@ -161,6 +161,10 @@ func mergeDirectory(goroot, tinygoroot, tmpgoroot, importPath string, overrides 
 			}
 		}
 
+		if isPathOnlyInTinyGo(importPath) {
+			return nil
+		}
+
 		// Symlink all directories from $GOROOT that are not part of the TinyGo
 		// overrides.
 		gorootEntries, err := ioutil.ReadDir(filepath.Join(goroot, "src", importPath))
@@ -198,6 +202,14 @@ func mergeDirectory(goroot, tinygoroot, tmpgoroot, importPath string, overrides 
 		}
 	}
 	return nil
+}
+
+func isPathOnlyInTinyGo(path string) bool {
+	if path == "runtime/interrupt" ||
+		path == "runtime/volatile" {
+		return true
+	}
+	return false
 }
 
 func isMergeTargetEntry(importPath string, name string) bool {
@@ -241,9 +253,15 @@ func pathsToOverride(needsSyscallPackage, needsTimePackage bool) map[string]bool
 		"machine/":              false,
 		"os/":                   true,
 		"reflect/":              false,
-		"runtime/":              false,
-		"sync/":                 true,
-		"testing/":              true,
+		"runtime/":              true,
+		"runtime/cgo/":          false,
+		"runtime/internal/":     false,
+		"runtime/interrupt/":    false,
+		"runtime/pprof/":        false,
+		"runtime/volatile/":     false,
+
+		"sync/":    true,
+		"testing/": true,
 	}
 	if needsSyscallPackage {
 		paths["syscall/"] = true // include syscall/js
