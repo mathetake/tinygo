@@ -7,32 +7,32 @@ import (
 )
 
 // Implements __wasi_iovec_t.
-type __wasi_iovec_t struct {
-	buf    unsafe.Pointer
-	bufLen uint
+type Wasi_iovec_t struct {
+	Buf    unsafe.Pointer
+	BufLen uint
 }
 
 //go:wasm-module wasi_unstable
 //export fd_write
-func fd_write(id uint32, iovs *__wasi_iovec_t, iovs_len uint, nwritten *uint) (errno uint)
-
-func postinit() {}
+func Fd_write(id uint32, iovs *Wasi_iovec_t, iovs_len uint, nwritten *uint) (errno uint)
 
 // Using global variables to avoid heap allocation.
 var (
 	putcharBuf   = byte(0)
-	putcharIOVec = __wasi_iovec_t{
-		buf:    unsafe.Pointer(&putcharBuf),
-		bufLen: 1,
+	putcharIOVec = Wasi_iovec_t{
+		Buf:    unsafe.Pointer(&putcharBuf),
+		BufLen: 1,
 	}
 )
+
+func postinit() {}
 
 func putchar(c byte) {
 	// write to stdout
 	const stdout = 1
 	var nwritten uint
 	putcharBuf = c
-	fd_write(stdout, &putcharIOVec, 1, &nwritten)
+	Fd_write(stdout, &putcharIOVec, 1, &nwritten)
 }
 
 // Abort executes the wasm 'unreachable' instruction.

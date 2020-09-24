@@ -1,9 +1,11 @@
-// +build baremetal
+// +build wasm,wasi
 
 package os
 
 import (
-	_ "unsafe"
+	"unsafe"
+
+	"runtime"
 )
 
 // Stdin, Stdout, and Stderr are open Files pointing to the standard input,
@@ -30,21 +32,19 @@ func (f stdioFileHandle) Read(b []byte) (n int, err error) {
 // Write writes len(b) bytes to the output. It returns the number of bytes
 // written or an error if this file is not stdout or stderr.
 func (f stdioFileHandle) Write(b []byte) (n int, err error) {
-	switch f {
-	case 1, 2: // stdout, stderr
-		for _, c := range b {
-			putchar(c)
-		}
-		return len(b), nil
-	default:
-		return 0, ErrUnsupported
+	vec := runtime.Wasi_iovec_t{
+		Buf:    unsafe.Pointer(&b[0]),
+		BufLen: uint(len(b)),
 	}
+	var nwritten uint
+	errno := runtime.Fd_write(uint32(f), &vec, 1, &nwritten)
+	if errno != 0 {
+		return 0, ErrInvalid
+	}
+	return int(nwritten), nil
 }
 
 // Close is unsupported on this system.
 func (f stdioFileHandle) Close() error {
 	return ErrUnsupported
 }
-
-//go:linkname putchar runtime.putchar
-func putchar(c byte)
