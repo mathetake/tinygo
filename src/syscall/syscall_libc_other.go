@@ -1,4 +1,4 @@
-// +build nintendoswitch
+// +build nintendoswitch wasi
 
 package syscall
 

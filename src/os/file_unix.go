@@ -1,4 +1,4 @@
-// +build darwin linux,!baremetal,!wasi freebsd,!baremetal
+// +build darwin linux,!baremetal freebsd,!baremetal wasm,wasi
 
 package os
 
